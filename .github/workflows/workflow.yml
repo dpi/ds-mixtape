@@ -24,12 +24,32 @@ jobs:
         run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
-      - run: composer config -- github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
-        name: Register GitHub token for Composer
       - name: "Install dependencies"
         uses: "ramsey/composer-install@v3"
         with:
           dependency-versions: ${{ matrix.dependency-versions }}
+      - name: "Setup tests"
+        run: |
+          make test-setup
       - name: "Run tests"
         run: |
           make test
+
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: ['8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: "shivammathur/setup-php@v2"
+        with:
+          php-version: ${{ matrix.php-versions }}
+        env:
+          COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Install dependencies"
+        uses: "ramsey/composer-install@v3"
+      - name: "Run PHPStan"
+        run: |
+          ./vendor/bin/phpstan analyse --no-progress
