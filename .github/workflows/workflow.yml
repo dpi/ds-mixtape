@@ -51,6 +51,7 @@ jobs:
       - name: Code Coverage Artifact
         uses: actions/upload-pages-artifact@v3
         with:
+          name: phpunit-coverage-${{ matrix.php-versions }}
           path: ./coverage-html
 
 
